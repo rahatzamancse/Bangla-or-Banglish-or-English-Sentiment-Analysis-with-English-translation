@@ -21,7 +21,7 @@ class TextBlobClass(Model):
         return ret
 
     def conclusion(self):
-        print(self.res.polarity)
+        # print(self.res.polarity)
         if -0.1 <= self.res.polarity <= 0.1:
             self.conc = "Neutral"
         elif self.res.polarity > 0.1:

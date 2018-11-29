@@ -1,0 +1,3 @@
+[submodule "pyavrophonetic"]
+	path = pyavrophonetic
+	url = https://github.com/insaneshadowzaman/pyavrophonetic.git
