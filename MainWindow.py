@@ -29,6 +29,9 @@ class MainWindow(QMainWindow):
         self.go_button.clicked.connect(self.go)
 
         self.banglish_radio.setChecked(True)
+        self.language.clear()
+        self.language.addItems(["translate", "googletrans", "TextBlob"])
+        self.language.setCurrentIndex(0)
 
     def resetAll(self):
         self.banglish_radio.setChecked(True)
@@ -53,7 +56,7 @@ class MainWindow(QMainWindow):
 
         # input = ("i am", phase.bengla)
 
-        results = MainWindow.getSenti(input, models)
+        results = self.getSenti(input, models)
 
         # results= [ {'name': extlob , 'resut': " ", 'conclusion':Neutral },
         #             {'name':nvadertext , 'resut': " ", 'conclusion':Neutral }
@@ -66,7 +69,7 @@ class MainWindow(QMainWindow):
 
         self.statusBar.showMessage("Done")
 
-    def getSenti(input, models):
+    def getSenti(self, input, models):
         sentence, phase = input
 
         if phase is PHASE.BANGLISH:
@@ -80,19 +83,20 @@ class MainWindow(QMainWindow):
             # 2 : googletrans
             # 3 : translate
 
-            use_api = 1
-            if use_api is 1:
+
+            use_api = self.language.currentIndex()
+            if use_api == 2:
+                print("Using Textblob translator")
                 sentence = str(TextBlob(sentence).translate(to='en'))
 
-            elif use_api is 2:
+            elif use_api == 1:
+                print("Using googletrans translator")
                 from googletrans import Translator
-                translator = Translator(service_urls=[
-                    'translate.google.com',
-                    'translate.google.co.kr',
-                ])
+                translator = Translator()
                 sentence = str(translator.translate(sentence))
 
-            elif use_api is 3:
+            elif use_api == 0:
+                print("Using translate translator")
                 from translate import Translator
                 translator = Translator(to_lang="en", from_lang="bn")
                 sentence = translator.translate(sentence)

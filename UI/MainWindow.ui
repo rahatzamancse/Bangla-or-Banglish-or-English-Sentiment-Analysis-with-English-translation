@@ -58,6 +58,9 @@
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout_6">
       <item>
+       <widget class="QComboBox" name="language"/>
+      </item>
+      <item>
        <spacer name="horizontalSpacer">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
