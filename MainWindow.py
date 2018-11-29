@@ -76,7 +76,10 @@ class MainWindow(QMainWindow):
             print("Bangla is :", sentence)
 
         if phase is PHASE.BANGLA:
-            sentence = str(TextBlob(sentence).translate(to='en'))
+            # sentence = str(TextBlob(sentence).translate(to='en'))
+            from googletrans import Translator
+            translator = Translator()
+            sentence = translator.translate(sentence)
             phase = PHASE.ENGLISH
             print("English is :", sentence)
 
