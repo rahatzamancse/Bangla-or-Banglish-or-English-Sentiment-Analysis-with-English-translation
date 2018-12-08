@@ -1,10 +1,11 @@
+import json
 from enum import Enum
-
-from
 
 from PyQt5.QtWidgets import QMainWindow, QStatusBar
 from PyQt5.uic import loadUi
 
+from prothomaloscraping.converttoutf import JSONUtf
+from prothomaloscraping.prothomalo.spiders.archive_getter import ProthomSpider
 from pyavrophonetic import avro
 from textblob import TextBlob
 
@@ -48,13 +49,34 @@ class MainWindow(QMainWindow):
 
     def parse_start(self):
         from scrapy.crawler import CrawlerProcess
+
         process = CrawlerProcess({
             'USER_AGENT': 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1)'
         })
 
-        process.crawl(ProthomSpider)
+        date = str(self.prothom_date_lineedit.text())
+        print(date)
+
+        process.crawl(ProthomSpider, date)
         self.statusBar.showMessage("Scraping from prothom alo")
-        process.start()
+        try:
+            process.start()
+        except:
+            self.statusBar.showMessage("Scraping error")
+
+        JSONUtf().start()
+
+        textb = ""
+        with open('results.json') as file:
+            data = json.load(file)
+            for item in data:
+                if 'comment' in item:
+                    for comment in item['comment']:
+                        textb = textb + "\n\n" + comment
+
+        self.json_view.setText(textb)
+        # self.json_view.setText(''.join([line for line in open("results.json", 'r')]))
+        self.statusBar.showMessage("Scraping DONE")
 
     def go(self):
         self.statusBar.showMessage("Calculating")
@@ -97,7 +119,6 @@ class MainWindow(QMainWindow):
             # 2 : googletrans
             # 3 : translate
 
-
             use_api = self.language.currentIndex()
             if use_api == 2:
                 print("Using Textblob translator")
@@ -128,6 +149,5 @@ class MainWindow(QMainWindow):
                 'conclusion': model.conclusion()
             }
             results.append(result)
-
 
         return results
