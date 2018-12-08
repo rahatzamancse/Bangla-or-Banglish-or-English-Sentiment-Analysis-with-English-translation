@@ -1,3 +1,6 @@
 [submodule "pyavrophonetic"]
 	path = pyavrophonetic
 	url = https://github.com/insaneshadowzaman/pyavrophonetic.git
+[submodule "prothomaloscraping"]
+	path = prothomaloscraping
+	url = https://github.com/insaneshadowzaman/prothomaloscraping.git

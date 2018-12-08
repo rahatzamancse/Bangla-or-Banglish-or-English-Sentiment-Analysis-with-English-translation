@@ -1,5 +1,7 @@
 from enum import Enum
 
+from
+
 from PyQt5.QtWidgets import QMainWindow, QStatusBar
 from PyQt5.uic import loadUi
 
@@ -33,6 +35,8 @@ class MainWindow(QMainWindow):
         self.language.addItems(["translate", "googletrans", "TextBlob"])
         self.language.setCurrentIndex(0)
 
+        self.parse_button.clicked.connect(self.parse_start)
+
     def resetAll(self):
         self.banglish_radio.setChecked(True)
         self.input_textedit.clear()
@@ -41,6 +45,16 @@ class MainWindow(QMainWindow):
         self.result1.setText("Press Analyse")
         self.result2.setText("Press Analyse")
         self.statusBar.showMessage("Cleared")
+
+    def parse_start(self):
+        from scrapy.crawler import CrawlerProcess
+        process = CrawlerProcess({
+            'USER_AGENT': 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1)'
+        })
+
+        process.crawl(ProthomSpider)
+        self.statusBar.showMessage("Scraping from prothom alo")
+        process.start()
 
     def go(self):
         self.statusBar.showMessage("Calculating")
