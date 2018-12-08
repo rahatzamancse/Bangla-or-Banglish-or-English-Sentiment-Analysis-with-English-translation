@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>695</width>
-    <height>472</height>
+    <width>753</width>
+    <height>537</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -39,9 +39,16 @@
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_9">
           <item>
-           <widget class="QLabel" name="label_3">
+           <widget class="QRadioButton" name="date_radio">
             <property name="text">
-             <string>Date :</string>
+             <string>Date</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QRadioButton" name="link_radio">
+            <property name="text">
+             <string>Link</string>
             </property>
            </widget>
           </item>

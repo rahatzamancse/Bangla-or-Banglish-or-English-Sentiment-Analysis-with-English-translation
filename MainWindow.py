@@ -6,6 +6,7 @@ from PyQt5.uic import loadUi
 
 from prothomaloscraping.converttoutf import JSONUtf
 from prothomaloscraping.prothomalo.spiders.archive_getter import ProthomSpider
+from prothomaloscraping.prothomalo.spiders.article_comments_getter import ArticleCommentsSpider
 from pyavrophonetic import avro
 from textblob import TextBlob
 
@@ -50,20 +51,24 @@ class MainWindow(QMainWindow):
     def parse_start(self):
         from scrapy.crawler import CrawlerProcess
 
+        with open("prothomaloscraping/prothom.json", 'w') as file:
+            file.write("")
+
         process = CrawlerProcess({
-            'USER_AGENT': 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1)'
+            'USER_AGENT': 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1)',
+            'FEED_FORMAT': 'json',
+            'FEED_URI': 'prothomaloscraping/prothom.json'
         })
 
-        date = str(self.prothom_date_lineedit.text())
-        print(date)
+        data = str(self.prothom_date_lineedit.text())
 
-        process.crawl(ProthomSpider, date)
+        if self.date_radio.isChecked():
+            process.crawl(ProthomSpider, data)
+        else:
+            process.crawl(ArticleCommentsSpider, data)
+
         self.statusBar.showMessage("Scraping from prothom alo")
-        try:
-            process.start()
-        except:
-            self.statusBar.showMessage("Scraping error")
-
+        process.start()
         JSONUtf().start()
 
         textb = ""
