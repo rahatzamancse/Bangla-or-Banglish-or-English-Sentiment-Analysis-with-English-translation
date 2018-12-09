@@ -1,17 +1,20 @@
 import json
+import textwrap
 from enum import Enum
 
-from PyQt5.QtWidgets import QMainWindow, QStatusBar
+import qdarkstyle
+from PyQt5.QtWidgets import QMainWindow, QStatusBar, QTreeWidgetItem, QFileDialog, QAction, QMenu, \
+    qApp
 from PyQt5.uic import loadUi
-
-from prothomaloscraping.converttoutf import JSONUtf
-from prothomaloscraping.prothomalo.spiders.archive_getter import ProthomSpider
-from prothomaloscraping.prothomalo.spiders.article_comments_getter import ArticleCommentsSpider
-from pyavrophonetic import avro
+from scrapy.crawler import CrawlerProcess
 from textblob import TextBlob
 
 from models.TextBlob import TextBlobClass
 from models.VaderSentiment import VaderSentiment
+from prothomaloscraping.converttoutf import JSONUtf
+from prothomaloscraping.prothomalo.spiders.archive_getter import ProthomSpider
+from prothomaloscraping.prothomalo.spiders.article_comments_getter import ArticleCommentsSpider
+from pyavrophonetic import avro
 
 
 class PHASE(Enum):
@@ -38,6 +41,72 @@ class MainWindow(QMainWindow):
         self.language.setCurrentIndex(0)
 
         self.parse_button.clicked.connect(self.parse_start)
+        self.send_from_tree_button.clicked.connect(self.moveItemToEdit)
+        self.itemSelected = None
+        self.text_clear_button.clicked.connect(self.clearText)
+        self.browse_button.clicked.connect(self.browser_file)
+        self.json_tree.setColumnCount(2)
+        self.json_tree.setHeaderLabels(["Title", "Content"])
+        self.json_tree.setColumnWidth(0, 100)
+        self.process = CrawlerProcess({
+            'USER_AGENT': 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1)',
+            'FEED_FORMAT': 'json',
+            'FEED_URI': 'prothomaloscraping/prothom.json'
+        })
+        self.initMenu()
+
+    def initMenu(self):
+        menubar = self.menuBar()
+        fileMenu = menubar.addMenu('&File')
+
+        # File menu
+
+        act = QAction('Load from json', self)
+        act.setStatusTip('Load from saved JSON file')
+        # act.triggered.connect(self.addCar)
+        fileMenu.addAction(act)
+
+        act = QAction('About', self)
+        act.setStatusTip('Show Gulu')
+        # act.triggered.connect(self.showArch)
+        fileMenu.addAction(act)
+
+        settingsMenu = menubar.addMenu('&Settings')
+        themeMenu = QMenu("Themes", self)
+        settingsMenu.addMenu(themeMenu)
+
+        act = QAction('Dark', self)
+        act.setStatusTip('Dark Theme')
+        act.triggered.connect(lambda: qApp.setStyleSheet(qdarkstyle.load_stylesheet_pyqt5()))
+        themeMenu.addAction(act)
+
+        act = QAction('White', self)
+        act.setStatusTip('White Theme')
+        act.triggered.connect(lambda: qApp.setStyleSheet(qdarkstyle.load_stylesheet_pyqt5()))
+        themeMenu.addAction(act)
+
+        ## Add Exit
+        fileMenu.addSeparator()
+        act = QAction('&Exit', self)
+        act.setShortcut('Ctrl+Q')
+        act.setStatusTip('Exit application')
+        act.triggered.connect(qApp.quit)
+        fileMenu.addAction(act)
+
+    def browser_file(self):
+        file = QFileDialog.getOpenFileName()[0]
+
+
+    def clearText(self):
+        self.input_textedit.clear()
+
+    def moveItemToEdit(self):
+        getSelected = self.json_tree.selectedItems()
+        if getSelected:
+            baseNode = getSelected[0]
+            text = baseNode.text(1)
+            self.input_textedit.setText(self.input_textedit.toPlainText() + "\n" + text)
+
 
     def resetAll(self):
         self.banglish_radio.setChecked(True)
@@ -49,39 +118,67 @@ class MainWindow(QMainWindow):
         self.statusBar.showMessage("Cleared")
 
     def parse_start(self):
-        from scrapy.crawler import CrawlerProcess
 
         with open("prothomaloscraping/prothom.json", 'w') as file:
             file.write("")
 
-        process = CrawlerProcess({
-            'USER_AGENT': 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1)',
-            'FEED_FORMAT': 'json',
-            'FEED_URI': 'prothomaloscraping/prothom.json'
-        })
-
         data = str(self.prothom_date_lineedit.text())
 
         if self.date_radio.isChecked():
-            process.crawl(ProthomSpider, data)
+            self.process.crawl(ProthomSpider, data)
         else:
-            process.crawl(ArticleCommentsSpider, data)
+            self.process.crawl(ArticleCommentsSpider, data)
 
         self.statusBar.showMessage("Scraping from prothom alo")
-        process.start()
+        self.process.start()
         JSONUtf().start()
 
-        textb = ""
+        json_data = {}
         with open('results.json') as file:
-            data = json.load(file)
-            for item in data:
-                if 'comment' in item:
-                    for comment in item['comment']:
-                        textb = textb + "\n\n" + comment
+            json_data = json.load(file)
 
-        self.json_view.setText(textb)
-        # self.json_view.setText(''.join([line for line in open("results.json", 'r')]))
+        data = []
+        for item in json_data:
+            if 'comment' in item:
+                tree = {}
+                if 'title-page' in item:
+                    tree['title'] = item['title-page'].strip()
+                    tree['content'] = []
+
+                    for content in item['content']:
+                        content = content.strip()
+                        if content != "":
+                            tree['content'].append(content)
+
+                    tree['comments'] = []
+                    for c in item['comment']:
+                        c = c.strip()
+                        if c != "":
+                            tree['comments'].append(c)
+                data.append(tree)
+
+        print(data)
+        self.updateTree(data)
+
         self.statusBar.showMessage("Scraping DONE")
+
+    def updateTree(self, data):
+        for tree in data:
+            item = QTreeWidgetItem(['Title', '\n'.join(textwrap.wrap(tree['title'], 50))])
+            full_con = ""
+            for con in tree['content']:
+                full_con = full_con + con
+            full_con = textwrap.wrap(full_con, 50)
+            full_con = '\n'.join(full_con)
+            con_child = QTreeWidgetItem(['Content', full_con])
+            # con_child.setSizeHint(1, QSize(100, 100))
+            com_child = QTreeWidgetItem(['Comments', ""])
+            for i, comment in enumerate(tree['comments']):
+                com_item = QTreeWidgetItem([str(i), '\n'.join(textwrap.wrap(comment, 40))])
+                com_child.addChild(com_item)
+            item.addChild(con_child)
+            item.addChild(com_child)
+            self.json_tree.addTopLevelItem(item)
 
     def go(self):
         self.statusBar.showMessage("Calculating")

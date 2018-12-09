@@ -6,7 +6,7 @@ from MainWindow import MainWindow
 def main():
     app = QApplication(sys.argv)
     main_window = MainWindow()
-    DARK_STYLE = True
+    DARK_STYLE = False
 
     if DARK_STYLE:
         import qdarkstyle
