@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>753</width>
-    <height>525</height>
+    <width>819</width>
+    <height>551</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -45,7 +45,7 @@
      </widget>
     </item>
     <item>
-     <layout class="QHBoxLayout" name="horizontalLayout_10">
+     <layout class="QHBoxLayout" name="horizontalLayout_10" stretch="5,1,5">
       <item>
        <layout class="QVBoxLayout" name="verticalLayout_6">
         <item>
@@ -146,6 +146,13 @@
        <layout class="QVBoxLayout" name="verticalLayout_4">
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_8">
+          <item>
+           <widget class="QRadioButton" name="auto_radio">
+            <property name="text">
+             <string>Auto</string>
+            </property>
+           </widget>
+          </item>
           <item>
            <widget class="QRadioButton" name="banglish_radio">
             <property name="text">

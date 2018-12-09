@@ -6,6 +6,7 @@ import qdarkstyle
 from PyQt5.QtWidgets import QMainWindow, QStatusBar, QTreeWidgetItem, QFileDialog, QAction, QMenu, \
     qApp
 from PyQt5.uic import loadUi
+from langdetect import detect
 from scrapy.crawler import CrawlerProcess
 from textblob import TextBlob
 
@@ -187,10 +188,26 @@ class MainWindow(QMainWindow):
 
         if self.banglish_radio.isChecked():
             input = (self.input_textedit.toPlainText(), PHASE.BANGLISH)
+            firstLan = 'Banglish'
         elif self.bangla_radio.isChecked():
             input = (self.input_textedit.toPlainText(), PHASE.BANGLA)
+            firstLan = 'Bangla'
         elif self.english_radio.isChecked():
             input = (self.input_textedit.toPlainText(), PHASE.ENGLISH)
+            firstLan = 'English'
+        elif self.auto_radio.isChecked():
+            text = self.input_textedit.toPlainText()
+            lan = detect(text)
+            if lan == 'en':
+                phase = PHASE.ENGLISH
+                firstLan = 'English'
+            elif lan == 'bn':
+                phase = PHASE.BANGLA
+                firstLan = 'Bangla'
+            else:
+                phase = PHASE.BANGLISH
+                firstLan = 'Banglish'
+            input = (text, phase)
 
         # input = ("i am", phase.bengla)
 
@@ -205,7 +222,7 @@ class MainWindow(QMainWindow):
         self.result1.setText(results[0]["conclusion"])
         self.result2.setText(results[1]["conclusion"])
 
-        self.statusBar.showMessage("Done")
+        self.statusBar.showMessage("The language is " + firstLan)
 
     def getSenti(self, input, models):
         sentence, phase = input
