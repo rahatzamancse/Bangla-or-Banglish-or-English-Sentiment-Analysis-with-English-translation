@@ -2,19 +2,19 @@ import json
 import textwrap
 from enum import Enum
 
-from PyQt5.QtCore import QSize
-from PyQt5.QtWidgets import QMainWindow, QStatusBar, QTreeWidgetItem, QFileDialog, QSizePolicy, QLabel
+import qdarkstyle
+from PyQt5.QtWidgets import QMainWindow, QStatusBar, QTreeWidgetItem, QFileDialog, QAction, QMenu, \
+    qApp
 from PyQt5.uic import loadUi
 from scrapy.crawler import CrawlerProcess
-
-from prothomaloscraping.converttoutf import JSONUtf
-from prothomaloscraping.prothomalo.spiders.archive_getter import ProthomSpider
-from prothomaloscraping.prothomalo.spiders.article_comments_getter import ArticleCommentsSpider
-from pyavrophonetic import avro
 from textblob import TextBlob
 
 from models.TextBlob import TextBlobClass
 from models.VaderSentiment import VaderSentiment
+from prothomaloscraping.converttoutf import JSONUtf
+from prothomaloscraping.prothomalo.spiders.archive_getter import ProthomSpider
+from prothomaloscraping.prothomalo.spiders.article_comments_getter import ArticleCommentsSpider
+from pyavrophonetic import avro
 
 
 class PHASE(Enum):
@@ -53,6 +53,45 @@ class MainWindow(QMainWindow):
             'FEED_FORMAT': 'json',
             'FEED_URI': 'prothomaloscraping/prothom.json'
         })
+        self.initMenu()
+
+    def initMenu(self):
+        menubar = self.menuBar()
+        fileMenu = menubar.addMenu('&File')
+
+        # File menu
+
+        act = QAction('Load from json', self)
+        act.setStatusTip('Load from saved JSON file')
+        # act.triggered.connect(self.addCar)
+        fileMenu.addAction(act)
+
+        act = QAction('About', self)
+        act.setStatusTip('Show Gulu')
+        # act.triggered.connect(self.showArch)
+        fileMenu.addAction(act)
+
+        settingsMenu = menubar.addMenu('&Settings')
+        themeMenu = QMenu("Themes", self)
+        settingsMenu.addMenu(themeMenu)
+
+        act = QAction('Dark', self)
+        act.setStatusTip('Dark Theme')
+        act.triggered.connect(lambda: qApp.setStyleSheet(qdarkstyle.load_stylesheet_pyqt5()))
+        themeMenu.addAction(act)
+
+        act = QAction('White', self)
+        act.setStatusTip('White Theme')
+        act.triggered.connect(lambda: qApp.setStyleSheet(qdarkstyle.load_stylesheet_pyqt5()))
+        themeMenu.addAction(act)
+
+        ## Add Exit
+        fileMenu.addSeparator()
+        act = QAction('&Exit', self)
+        act.setShortcut('Ctrl+Q')
+        act.setStatusTip('Exit application')
+        act.triggered.connect(qApp.quit)
+        fileMenu.addAction(act)
 
     def browser_file(self):
         file = QFileDialog.getOpenFileName()[0]
