@@ -56,9 +56,13 @@ So If you'd like to contribute, please fork the repository and use a feature bra
 
 ## Author
 Rahat Zaman
+
 rahatzamancse@gmail.com
+
 Student at Department of Computer Science and Engineering
+
 Khulna University of Engineering & Technology, Khulna
+
 Bangladesh
 
 ## Licensing
